@@ -1,6 +1,21 @@
 version: '3.8'
 services:
-  web:
+  postgres_db:
+    container_name: dawnlit-db
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: user_password_here
+      POSTGRES_USER: username_here
+      POSTGRES_DB: main
+    ports:
+      - 5432:5432
+  postgres_adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+  gitlab_web:
     container_name: gitlab-service
     image: 'gitlab/gitlab-ee:latest'
     restart: always

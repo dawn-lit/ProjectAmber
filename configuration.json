@@ -1,0 +1,7 @@
+{
+    "additional_apt_packages": [],
+    "additional_snap_packages": [],
+    "dawnlit_database_connection": "Host=localhost;Database=main;Username=postgres;Password=root",
+    "npassword": "",
+    "username": ""
+}
