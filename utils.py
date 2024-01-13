@@ -41,3 +41,18 @@ def execute_sudo_docker(*action: str) -> None:
 CUSTOM_CONFIGURATION: Final[dict] = read_json(
     os.path.join(BASE_PATH, "configuration.json")
 )
+
+# make sure user customized configuration has been configured
+if (
+    CUSTOM_CONFIGURATION["dawnlit_database_connection"]
+    == "Host=localhost;Database=main;Username=postgres;Password=root"
+):
+    raise ValueError(
+        "configuration.json: dawnlit_database_connection has not being configured correctly!"
+    )
+
+if len(CUSTOM_CONFIGURATION["password"]) == 0:
+    raise ValueError("configuration.json: password has not being configured correctly!")
+
+if len(CUSTOM_CONFIGURATION["username"]) == 0:
+    raise ValueError("configuration.json: username has not being configured correctly!")

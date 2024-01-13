@@ -2,6 +2,16 @@ import shutil
 
 from utils import *
 
+# make sure ssl cert and key are valid
+if os.stat(os.path.join(BASE_PATH, "ssl", "cert.pem")).st_size == 0:
+    raise ValueError("cert.pem is empty!")
+if os.stat(os.path.join(BASE_PATH, "ssl", "key.pem")).st_size == 0:
+    raise ValueError("key.pem is empty!")
+
+# setup gitlab volumes location
+execute_sudo_docker("sudo", "mkdir", "-p", "/srv/gitlab")
+execute_sudo_docker("export", "GITLAB_HOME=/srv/gitlab")
+
 # setup docker-compose
 execute_sudo_docker("compose", "up", "-d")
 
