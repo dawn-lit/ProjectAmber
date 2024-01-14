@@ -9,8 +9,9 @@ if os.stat(os.path.join(BASE_PATH, "ssl", "key.pem")).st_size == 0:
     raise ValueError("key.pem is empty!")
 
 # setup gitlab volumes location
-execute_sudo_docker("sudo", "mkdir", "-p", "/srv/gitlab")
-execute_sudo_docker("export", "GITLAB_HOME=/srv/gitlab")
+# execute_sudo_docker("sudo", "mkdir", "-p", "/srv/gitlab")
+# execute_sudo_docker("export", "GITLAB_HOME=/srv/gitlab")
+execute_sudo_docker("export", f"GITLAB_HOME={SHARE_FOLDER_DIR}")
 
 # setup docker-compose
 execute_sudo_docker("compose", "up", "-d")

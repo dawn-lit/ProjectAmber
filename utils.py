@@ -56,3 +56,8 @@ if len(CUSTOM_CONFIGURATION["password"]) == 0:
 
 if len(CUSTOM_CONFIGURATION["username"]) == 0:
     raise ValueError("configuration.json: username has not being configured correctly!")
+
+# path to locally shared folder
+SHARE_FOLDER_DIR: Final[str] = os.path.join(
+    "/home", CUSTOM_CONFIGURATION["username"], "MyShare"
+)

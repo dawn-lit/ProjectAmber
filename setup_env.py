@@ -12,6 +12,7 @@ _apt_packages: Final[tuple[str, ...]] = (
     "docker",
     "docker-compose",
     "docker-compose-plugin",
+    "cockpit",
     "samba",
     *CUSTOM_CONFIGURATION["additional_apt_packages"],
 )
@@ -28,15 +29,18 @@ _snap_packages: Final[tuple[str, ...]] = CUSTOM_CONFIGURATION[
 for pkg in _snap_packages:
     execute_sudo_snap_install(pkg)
 
+# enable Cockpit
+check_call(["sudo", "systemctl", "enable", "--now", "cockpit.socket"])
+
 # create folder for samba share
-os.makedirs(f"/home/{CUSTOM_CONFIGURATION['username']}/share", exist_ok=True)
+os.makedirs(SHARE_FOLDER_DIR)
 # add config to smb.conf
 check_call(
     [
         "sudo",
         "echo",
         "-e",
-        f"[sambashare]\n    comment = Samba on DawnLit\n    path = /home/{CUSTOM_CONFIGURATION['username']}/sambashare\n    read only = no\n    browsable = yes\n",
+        f"[sambashare]\n    comment = Samba on DawnLit\n    path = {SHARE_FOLDER_DIR}\n    read only = no\n    browsable = yes\n",
         ">>",
         "/etc/samba/smb.conf",
     ]
