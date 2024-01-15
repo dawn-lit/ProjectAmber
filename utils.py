@@ -37,8 +37,12 @@ def execute_sudo_docker(*action: str) -> None:
     check_call(["sudo", "docker", *action])
 
 
-def create_file(path: str, content: str) -> None:
+def add_content(path: str, content: str) -> None:
     check_call(["sudo", "echo", "-e", content, ">>", path])
+
+
+def restart_service(name: str) -> None:
+    check_call(["sudo", "service", name, "restart"])
 
 
 # user customized configuration

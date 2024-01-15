@@ -41,8 +41,8 @@ shutil.copy2("./nginx.conf", "/etc/nginx/conf.d/default.conf")
 # make sure ssl dir exits
 os.makedirs("/etc/ssl", exist_ok=True)
 # write dns certificate
-create_file("/etc/ssl/cert.pem", CUSTOM_CONFIGURATION["ssl_cert"])
+add_content("/etc/ssl/cert.pem", CUSTOM_CONFIGURATION["ssl_cert"])
 # write dns key
-create_file("/etc/ssl/key.pem", CUSTOM_CONFIGURATION["ssl_key"])
+add_content("/etc/ssl/key.pem", CUSTOM_CONFIGURATION["ssl_key"])
 # restart nginx service
-check_call(["sudo", "service", "nginx", "restart"])
+restart_service("nginx")

@@ -1,5 +1,10 @@
 from utils import *
 
+# keep system running with the lid closed
+add_content("/etc/systemd/logind.conf", "HandleLidSwitch=ignore")
+add_content("/etc/systemd/logind.conf", "LidSwitchIgnoreInhibited=no")
+restart_service("systemd-logind")
+
 # update to latest env
 execute_sudo_apt("update")
 execute_sudo_apt("upgrade", "-y")
@@ -35,16 +40,16 @@ check_call(["sudo", "systemctl", "enable", "--now", "cockpit.socket"])
 # create folder for samba share
 os.makedirs(SHARE_FOLDER_DIR)
 # add config to smb.conf
-create_file(
+add_content(
     "/etc/samba/smb.conf",
     f"[sambashare]\n    comment = Samba on DawnLit\n    path = {SHARE_FOLDER_DIR}\n    read only = no\n    browsable = yes\n",
 )
 # restart Samba
-check_call(["sudo", "service", "smbd", "restart"])
+restart_service("smbd")
 # Update the firewall rules to allow Samba traffic:
 check_call(["sudo", "ufw", "allow", "samba"])
 # setup samba user
-create_file(
+add_content(
     "./createSambaUser.sh",
     f'#!/bin/bash\nusername={CUSTOM_CONFIGURATION["username"]}\npassword={CUSTOM_CONFIGURATION["password"]}\n(echo "$password"; echo "$password") | smbpasswd -s -a "$username"\n',
 )
