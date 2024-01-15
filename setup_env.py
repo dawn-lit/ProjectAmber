@@ -35,29 +35,17 @@ check_call(["sudo", "systemctl", "enable", "--now", "cockpit.socket"])
 # create folder for samba share
 os.makedirs(SHARE_FOLDER_DIR)
 # add config to smb.conf
-check_call(
-    [
-        "sudo",
-        "echo",
-        "-e",
-        f"[sambashare]\n    comment = Samba on DawnLit\n    path = {SHARE_FOLDER_DIR}\n    read only = no\n    browsable = yes\n",
-        ">>",
-        "/etc/samba/smb.conf",
-    ]
+create_file(
+    "/etc/samba/smb.conf",
+    f"[sambashare]\n    comment = Samba on DawnLit\n    path = {SHARE_FOLDER_DIR}\n    read only = no\n    browsable = yes\n",
 )
 # restart Samba
 check_call(["sudo", "service", "smbd", "restart"])
 # Update the firewall rules to allow Samba traffic:
 check_call(["sudo", "ufw", "allow", "samba"])
 # setup samba user
-check_call(
-    [
-        "sudo",
-        "echo",
-        "-e",
-        f'#!/bin/bash\nusername={CUSTOM_CONFIGURATION["username"]}\npassword={CUSTOM_CONFIGURATION["password"]}\n(echo "$password"; echo "$password") | smbpasswd -s -a "$username"\n',
-        ">>",
-        "./createSambaUser.sh",
-    ]
+create_file(
+    "./createSambaUser.sh",
+    f'#!/bin/bash\nusername={CUSTOM_CONFIGURATION["username"]}\npassword={CUSTOM_CONFIGURATION["password"]}\n(echo "$password"; echo "$password") | smbpasswd -s -a "$username"\n',
 )
 check_call(["sudo", "./createSambaUser.sh"])

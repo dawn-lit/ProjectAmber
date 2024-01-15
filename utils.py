@@ -37,6 +37,10 @@ def execute_sudo_docker(*action: str) -> None:
     check_call(["sudo", "docker", *action])
 
 
+def create_file(path: str, content: str) -> None:
+    check_call(["sudo", "echo", "-e", content, ">>", path])
+
+
 # user customized configuration
 CUSTOM_CONFIGURATION: Final[dict] = read_json(
     os.path.join(BASE_PATH, "configuration.json")
@@ -56,6 +60,14 @@ if len(CUSTOM_CONFIGURATION["password"]) == 0:
 
 if len(CUSTOM_CONFIGURATION["username"]) == 0:
     raise ValueError("configuration.json: username has not being configured correctly!")
+
+# make sure ssl key is valid
+if len(CUSTOM_CONFIGURATION["ssl_key"]) == 0:
+    raise ValueError("configuration.json: ssl_key has not being configured correctly!")
+
+# make sure ssl cert is valid
+if len(CUSTOM_CONFIGURATION["ssl_cert"]) == 0:
+    raise ValueError("configuration.json: ssl_cert has not being configured correctly!")
 
 # path to locally shared folder
 SHARE_FOLDER_DIR: Final[str] = os.path.join(

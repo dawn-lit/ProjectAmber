@@ -2,12 +2,6 @@ import shutil
 
 from utils import *
 
-# make sure ssl cert and key are valid
-if os.stat(os.path.join(BASE_PATH, "ssl", "cert.pem")).st_size == 0:
-    raise ValueError("cert.pem is empty!")
-if os.stat(os.path.join(BASE_PATH, "ssl", "key.pem")).st_size == 0:
-    raise ValueError("key.pem is empty!")
-
 # setup gitlab volumes location
 # execute_sudo_docker("sudo", "mkdir", "-p", "/srv/gitlab")
 # execute_sudo_docker("export", "GITLAB_HOME=/srv/gitlab")
@@ -46,9 +40,9 @@ execute_sudo_docker(
 shutil.copy2("./nginx.conf", "/etc/nginx/conf.d/default.conf")
 # make sure ssl dir exits
 os.makedirs("/etc/ssl", exist_ok=True)
-# copy dns certificate
-shutil.copy2("./ssl/cert.pem", "/etc/ssl/cert.pem")
-# copy dns key
-shutil.copy2("./ssl/key.pem", "/etc/ssl/key.pem")
+# write dns certificate
+create_file("/etc/ssl/cert.pem", CUSTOM_CONFIGURATION["ssl_cert"])
+# write dns key
+create_file("/etc/ssl/key.pem", CUSTOM_CONFIGURATION["ssl_key"])
 # restart nginx service
 check_call(["sudo", "service", "nginx", "restart"])

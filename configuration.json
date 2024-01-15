@@ -5,5 +5,7 @@
     "additional_snap_packages": [],
     "dawnlit_database_connection": "Host=localhost;Database=main;Username=postgres;Password=root",
     "password": "",
+    "ssl_cert": "",
+    "ssl_key": "",
     "username": ""
 }
