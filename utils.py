@@ -3,6 +3,8 @@ import os
 from subprocess import check_call
 from typing import Final
 
+import yaml
+
 # base path
 BASE_PATH: Final[str] = os.path.dirname(__file__)
 
@@ -19,14 +21,20 @@ def execute_sudo_snap(*action: str) -> None:
     check_call(["sudo", "snap", *action])
 
 
-def read_json(path: str) -> dict:
+def read_config(path: str) -> dict:
     with open(path, "r", encoding="utf-8") as f:
-        return dict(json.load(f))
+        if path.endswith(".yaml") or path.endswith(".yml"):
+            return dict(yaml.load(f.read(), Loader=yaml.Loader))
+        else:
+            return dict(json.load(f))
 
 
-def write_json(path: str, data: dict) -> None:
+def write_config(path: str, data: dict) -> None:
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False, sort_keys=True)
+        if path.endswith(".yaml") or path.endswith(".yml"):
+            yaml.dump(data, f, allow_unicode=True)
+        else:
+            json.dump(data, f, indent=4, ensure_ascii=False, sort_keys=True)
 
 
 def execute_sudo_snap_install(_lib: str) -> None:
@@ -38,7 +46,12 @@ def execute_sudo_docker(*action: str) -> None:
 
 
 def add_content(path: str, content: str) -> None:
-    check_call(["sudo", "echo", "-e", content, ">>", path])
+    check_call(["sudo", "bash", "-c", " ".join(["echo", "-e", content, ">>", path])])
+
+
+def write_texts(path: str, texts: list[str]) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        f.writelines(texts)
 
 
 def restart_service(name: str) -> None:
@@ -46,7 +59,7 @@ def restart_service(name: str) -> None:
 
 
 # user customized configuration
-CUSTOM_CONFIGURATION: Final[dict] = read_json(
+CUSTOM_CONFIGURATION: Final[dict] = read_config(
     os.path.join(BASE_PATH, "configuration.json")
 )
 

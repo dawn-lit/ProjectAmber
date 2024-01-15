@@ -3,7 +3,6 @@ from utils import *
 # keep system running with the lid closed
 add_content("/etc/systemd/logind.conf", "HandleLidSwitch=ignore")
 add_content("/etc/systemd/logind.conf", "LidSwitchIgnoreInhibited=no")
-restart_service("systemd-logind")
 
 # update to latest env
 execute_sudo_apt("update")
@@ -16,9 +15,9 @@ _apt_packages: Final[tuple[str, ...]] = (
     "git",
     "docker",
     "docker-compose",
-    "docker-compose-plugin",
     "cockpit",
     "samba",
+    "python3-pip",
     *CUSTOM_CONFIGURATION["additional_apt_packages"],
 )
 for pkg in _apt_packages:
@@ -38,19 +37,25 @@ for pkg in _snap_packages:
 check_call(["sudo", "systemctl", "enable", "--now", "cockpit.socket"])
 
 # create folder for samba share
-os.makedirs(SHARE_FOLDER_DIR)
+os.makedirs(SHARE_FOLDER_DIR, exist_ok=True)
 # add config to smb.conf
-add_content(
-    "/etc/samba/smb.conf",
-    f"[sambashare]\n    comment = Samba on DawnLit\n    path = {SHARE_FOLDER_DIR}\n    read only = no\n    browsable = yes\n",
-)
+add_content("/etc/samba/smb.conf", "[sambashare]")
+add_content("/etc/samba/smb.conf", "    comment = Samba on DawnLit")
+add_content("/etc/samba/smb.conf", f"    path = {SHARE_FOLDER_DIR}")
+add_content("/etc/samba/smb.conf", "    read only = no")
+add_content("/etc/samba/smb.conf", "    browsable = yes")
 # restart Samba
 restart_service("smbd")
-# Update the firewall rules to allow Samba traffic:
+# Update the firewall rules to allow Samba traffic
 check_call(["sudo", "ufw", "allow", "samba"])
 # setup samba user
-add_content(
+write_texts(
     "./createSambaUser.sh",
-    f'#!/bin/bash\nusername={CUSTOM_CONFIGURATION["username"]}\npassword={CUSTOM_CONFIGURATION["password"]}\n(echo "$password"; echo "$password") | smbpasswd -s -a "$username"\n',
+    [
+        "#!/bin/bash\n",
+        f'username={CUSTOM_CONFIGURATION["username"]}\n',
+        f'password={CUSTOM_CONFIGURATION["password"]}\n',
+        '(echo "$password"; echo "$password") | smbpasswd -s -a "$username"\n',
+    ],
 )
-check_call(["sudo", "./createSambaUser.sh"])
+check_call(["sudo", "sh", "./createSambaUser.sh"])
