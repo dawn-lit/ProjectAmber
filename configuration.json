@@ -1,8 +1,9 @@
 {
     "additional_apt_packages": [],
     "additional_snap_packages": [],
-    "dawnlit_database_connection": "Host=localhost;Database=main;Username=postgres;Password=root",
     "password": "",
+    "postgres_db_host": "localhost",
+    "postgres_db_name": "main",
     "postgres_db_password": "",
     "postgres_db_username": "",
     "ssl_cert": [],

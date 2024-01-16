@@ -3,6 +3,7 @@ from utils import *
 # keep system running with the lid closed
 add_content("/etc/systemd/logind.conf", "HandleLidSwitch=ignore")
 add_content("/etc/systemd/logind.conf", "LidSwitchIgnoreInhibited=no")
+add_content("/etc/needrestart/needrestart.conf", "$nrconf{restart} = 'a'")
 
 # update to latest env
 execute_sudo_apt("update")
@@ -13,11 +14,13 @@ execute_sudo_apt("autoclean")
 # install necessary apt packages
 _apt_packages: Final[tuple[str, ...]] = (
     "git",
+    "git-lfs",
     "docker",
     "docker-compose",
     "cockpit",
     "samba",
     "python3-pip",
+    "nginx",
     *CUSTOM_CONFIGURATION["additional_apt_packages"],
 )
 for pkg in _apt_packages:
@@ -38,6 +41,7 @@ check_call(["sudo", "systemctl", "enable", "--now", "cockpit.socket"])
 
 # create folder for samba share
 os.makedirs(SHARE_FOLDER_DIR, exist_ok=True)
+public_folder(SHARE_FOLDER_DIR)
 # add config to smb.conf
 add_content("/etc/samba/smb.conf", "[sambashare]")
 add_content("/etc/samba/smb.conf", "    comment = Samba on DawnLit")
@@ -52,10 +56,14 @@ check_call(["sudo", "ufw", "allow", "samba"])
 write_texts(
     "./createSambaUser.sh",
     [
-        "#!/bin/bash\n",
-        f'username={CUSTOM_CONFIGURATION["username"]}\n',
-        f'password={CUSTOM_CONFIGURATION["password"]}\n',
-        '(echo "$password"; echo "$password") | smbpasswd -s -a "$username"\n',
+        "#!/bin/bash",
+        f'username={CUSTOM_CONFIGURATION["username"]}',
+        f'password={CUSTOM_CONFIGURATION["password"]}',
+        '(echo "$password"; echo "$password") | smbpasswd -s -a "$username"',
     ],
 )
 check_call(["sudo", "sh", "./createSambaUser.sh"])
+
+os.remove("./createSambaUser.sh")
+
+check_call(["sudo", "reboot"])

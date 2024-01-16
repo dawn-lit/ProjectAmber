@@ -51,26 +51,32 @@ def add_content(path: str, content: str) -> None:
 
 def write_texts(path: str, texts: list[str]) -> None:
     with open(path, "w", encoding="utf-8") as f:
-        f.writelines(texts)
+        f.writelines(
+            t + "\n" if i != len(texts) - 1 else t for i, t in enumerate(texts)
+        )
+
+
+def remove_if_exists(path: str) -> None:
+    if os.path.exists(path):
+        os.remove(path)
 
 
 def restart_service(name: str) -> None:
     check_call(["sudo", "service", name, "restart"])
 
 
+def restart_systemctl(name: str) -> None:
+    check_call(["sudo", "systemctl", "restart", name])
+
+
+def public_folder(_dir: str) -> None:
+    check_call(["sudo", "chmod", "777", "-R", _dir])
+
+
 # user customized configuration
 CUSTOM_CONFIGURATION: Final[dict] = read_config(
     os.path.join(BASE_PATH, "configuration.json")
 )
-
-# make sure user customized configuration has been configured
-if (
-    CUSTOM_CONFIGURATION["dawnlit_database_connection"]
-    == "Host=localhost;Database=main;Username=postgres;Password=root"
-):
-    raise ValueError(
-        "configuration.json: dawnlit_database_connection has not being configured correctly!"
-    )
 
 if len(CUSTOM_CONFIGURATION["password"]) == 0:
     raise ValueError("configuration.json: password has not being configured correctly!")

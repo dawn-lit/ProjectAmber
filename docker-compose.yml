@@ -1,25 +1,6 @@
-version: '3.8'
 services:
-  postgres_db:
-    container_name: dawnlit-db
-    image: postgres:latest
-    restart: always
-    environment:
-      POSTGRES_USER: username_here
-      POSTGRES_PASSWORD: user_password_here
-      POSTGRES_DB: main
-    ports:
-      - 5432:5432
-  postgres_adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
   gitlab_web:
     container_name: gitlab-service
-    image: 'gitlab/gitlab-ee:latest'
-    restart: always
-    hostname: 'gitlab.dawnlit.com'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
         external_url 'https://gitlab.dawnlit.com:8929'
@@ -27,12 +8,31 @@ services:
         nginx['ssl_certificate'] = "/etc/ssl/certs/gitlab/cert.pem"
         nginx['ssl_certificate_key'] = "/etc/ssl/certs/gitlab/key.pem"
         # Add any other gitlab.rb configuration here, each on its own line
+    hostname: gitlab.dawnlit.com
+    image: gitlab/gitlab-ee:latest
     ports:
-      - '8929:8929'
-      - '2224:22'
+    - 8929:8929
+    - '2224:22'
+    restart: always
+    shm_size: 256m
     volumes:
-      - '$GITLAB_HOME/config:/etc/gitlab'
-      - '$GITLAB_HOME/ssl:/etc/ssl/certs/gitlab'
-      - '$GITLAB_HOME/logs:/var/log/gitlab'
-      - '$GITLAB_HOME/data:/var/opt/gitlab'
-    shm_size: '256m'
+    - $GITLAB_HOME/config:/etc/gitlab
+    - $GITLAB_SSL:/etc/ssl/certs/gitlab
+    - $GITLAB_HOME/logs:/var/log/gitlab
+    - $GITLAB_HOME/data:/var/opt/gitlab
+  postgres_adminer:
+    image: adminer
+    ports:
+    - 8080:8080
+    restart: always
+  postgres_db:
+    container_name: dawnlit-db
+    environment:
+      POSTGRES_DB: name_here
+      POSTGRES_PASSWORD: password_here
+      POSTGRES_USER: username_here
+    image: postgres:latest
+    ports:
+    - 5432:5432
+    restart: always
+version: '3.8'
