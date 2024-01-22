@@ -3,12 +3,12 @@ services:
     container_name: gitlab-service
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://gitlab.dawnlit.com:8929'
+        external_url 'https://gitlab.example.com:8929'
         gitlab_rails['gitlab_shell_ssh_port'] = 2224
         nginx['ssl_certificate'] = "/etc/ssl/certs/gitlab/cert.pem"
         nginx['ssl_certificate_key'] = "/etc/ssl/certs/gitlab/key.pem"
         # Add any other gitlab.rb configuration here, each on its own line
-    hostname: gitlab.dawnlit.com
+    hostname: gitlab.example.com
     image: gitlab/gitlab-ee:latest
     ports:
     - 8929:8929

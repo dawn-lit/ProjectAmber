@@ -1,6 +1,7 @@
 {
     "additional_apt_packages": [],
     "additional_snap_packages": [],
+    "domain": "example.com",
     "password": "",
     "postgres_db_host": "localhost",
     "postgres_db_name": "main",

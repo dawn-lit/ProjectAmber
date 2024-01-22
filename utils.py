@@ -73,26 +73,66 @@ def public_folder(_dir: str) -> None:
     check_call(["sudo", "chmod", "777", "-R", _dir])
 
 
+def replace_content_in_file(file_path: str, from_text: str, to_text: str) -> None:
+    with open(file_path, "r", encoding="utf-8") as f:
+        content: str = f.read()
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(content.replace(from_text, to_text))
+
+
 # user customized configuration
-CUSTOM_CONFIGURATION: Final[dict] = read_config(
-    os.path.join(BASE_PATH, "configuration.json")
-)
+CUSTOM_CONFIGURATION_PATH: Final[str] = os.path.join(BASE_PATH, "configuration.json")
+CUSTOM_CONFIGURATION: Final[dict] = read_config(CUSTOM_CONFIGURATION_PATH)
 
-if len(CUSTOM_CONFIGURATION["password"]) == 0:
-    raise ValueError("configuration.json: password has not being configured correctly!")
+_ENABLE_CUSTOM_CONFIGURATION_VALIDATION: bool = True
 
-if len(CUSTOM_CONFIGURATION["username"]) == 0:
-    raise ValueError("configuration.json: username has not being configured correctly!")
+if _ENABLE_CUSTOM_CONFIGURATION_VALIDATION:
+    if len(CUSTOM_CONFIGURATION["password"]) == 0:
+        raise ValueError(
+            "configuration.json: password has not being configured correctly!"
+        )
 
-# make sure ssl key is valid
-if len(CUSTOM_CONFIGURATION["ssl_key"]) == 0:
-    raise ValueError("configuration.json: ssl_key has not being configured correctly!")
+    if len(CUSTOM_CONFIGURATION["username"]) == 0:
+        raise ValueError(
+            "configuration.json: username has not being configured correctly!"
+        )
 
-# make sure ssl cert is valid
-if len(CUSTOM_CONFIGURATION["ssl_cert"]) == 0:
-    raise ValueError("configuration.json: ssl_cert has not being configured correctly!")
+    # make sure ssl key is valid
+    if len(CUSTOM_CONFIGURATION["ssl_key"]) == 0:
+        raise ValueError(
+            "configuration.json: ssl_key has not being configured correctly!"
+        )
+
+    # make sure ssl cert is valid
+    if len(CUSTOM_CONFIGURATION["ssl_cert"]) == 0:
+        raise ValueError(
+            "configuration.json: ssl_cert has not being configured correctly!"
+        )
+
+    # make domain is valid
+    if len(CUSTOM_CONFIGURATION["domain"]) == "example.com":
+        raise ValueError(
+            "configuration.json: domain has not being configured correctly!"
+        )
 
 # path to locally shared folder
 SHARE_FOLDER_DIR: Final[str] = os.path.join(
     "/home", CUSTOM_CONFIGURATION["username"], "MyShare"
+)
+
+# update domain in files
+replace_content_in_file(
+    os.path.join(BASE_PATH, "nginx.glob.conf"),
+    "example.com",
+    CUSTOM_CONFIGURATION["domain"],
+)
+replace_content_in_file(
+    os.path.join(BASE_PATH, "dawnlit_web", "nginx.prod.conf"),
+    "example.com",
+    CUSTOM_CONFIGURATION["domain"],
+)
+replace_content_in_file(
+    os.path.join(BASE_PATH, "docker-compose.yml"),
+    "example.com",
+    CUSTOM_CONFIGURATION["domain"],
 )
