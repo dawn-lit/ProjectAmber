@@ -19,15 +19,15 @@ write_texts(".env", [f"GITLAB_HOME={SHARE_FOLDER_DIR}/gitlab", f"GITLAB_SSL=/etc
 
 # update postgres_db config username and password
 dk_compose: dict = read_config(os.path.join(BASE_PATH, "docker-compose.yml"))
-dk_compose["services"]["postgres_db"]["environment"][
-    "POSTGRES_DB"
-] = CUSTOM_CONFIGURATION["postgres_db_name"]
-dk_compose["services"]["postgres_db"]["environment"][
-    "POSTGRES_USER"
-] = CUSTOM_CONFIGURATION["postgres_db_username"]
-dk_compose["services"]["postgres_db"]["environment"][
-    "POSTGRES_PASSWORD"
-] = CUSTOM_CONFIGURATION["postgres_db_password"]
+dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_DB"] = (
+    CUSTOM_CONFIGURATION["postgres_db_name"]
+)
+dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_USER"] = (
+    CUSTOM_CONFIGURATION["postgres_db_username"]
+)
+dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_PASSWORD"] = (
+    CUSTOM_CONFIGURATION["postgres_db_password"]
+)
 write_config(os.path.join(BASE_PATH, "docker-compose.yml"), dk_compose)
 
 # setup docker-compose

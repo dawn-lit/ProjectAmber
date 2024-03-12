@@ -1,4 +1,5 @@
 {
+    "SharedFolderName": "MyShare",
     "additional_apt_packages": [],
     "additional_snap_packages": [],
     "domain": "example.com",

@@ -117,7 +117,7 @@ if _ENABLE_CUSTOM_CONFIGURATION_VALIDATION:
 
 # path to locally shared folder
 SHARE_FOLDER_DIR: Final[str] = os.path.join(
-    "/home", CUSTOM_CONFIGURATION["username"], "MyShare"
+    "/home", CUSTOM_CONFIGURATION["username"], CUSTOM_CONFIGURATION["SharedFolderName"]
 )
 
 # update domain in files
