@@ -67,3 +67,15 @@ check_call(["sudo", "sh", "./createSambaUser.sh"])
 os.remove("./createSambaUser.sh")
 
 check_call(["sudo", "reboot"])
+
+# create .config/code-server folder
+check_call(["sudo", "mkdir", "-p", "~/.config/code-server"])
+
+# make .config/code-server folder public
+public_folder("~/.config/code-server")
+
+# create .local/share/code-server folder
+check_call(["sudo", "mkdir", "-p", "~/.local/share/code-server"])
+
+# make .config/code-server folder public
+public_folder("~/.local/share/code-server")

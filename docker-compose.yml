@@ -26,7 +26,7 @@ services:
     - 8080:8080
     restart: always
   postgres_db:
-    container_name: dawnlit-db
+    container_name: postgres-db
     environment:
       POSTGRES_DB: name_here
       POSTGRES_PASSWORD: password_here

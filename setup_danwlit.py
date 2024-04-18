@@ -31,7 +31,7 @@ dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_PASSWORD"] = (
 write_config(os.path.join(BASE_PATH, "docker-compose.yml"), dk_compose)
 
 # setup docker-compose
-check_call(["sudo", "docker-compose", "up", "-d"])
+check_call(["sudo", "docker-compose", "up", "-d", "gitlab_web", "postgres_db"])
 
 # dawnlit backend dir path
 _BACKEND_DIR: str = os.path.join(BASE_PATH, "DawnLitWeb")
@@ -90,6 +90,27 @@ execute_sudo_docker("build", _FRONTEND_DIR, "-t", "angular-app")
 # run front-end application
 execute_sudo_docker(
     "run", "--name", "angular-app", "-d", "-p", "4200:443", "angular-app"
+)
+
+# start code-server
+execute_sudo_docker(
+    "run",
+    "-it",
+    "--name",
+    "code-server",
+    "-p",
+    "8949:8080",
+    "-v",
+    "$HOME/.local:/home/coder/.local",
+    "-v",
+    "$HOME/.config:/home/coder/.config",
+    "-v",
+    "$PWD:/home/coder/project",
+    "-u",
+    "$(id -u):$(id -g)",
+    "-e",
+    "DOCKER_USER=$USER",
+    "codercom/code-server:latest",
 )
 
 # setup nginx
