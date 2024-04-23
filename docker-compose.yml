@@ -7,6 +7,10 @@ services:
         gitlab_rails['gitlab_shell_ssh_port'] = 2224
         nginx['ssl_certificate'] = "/etc/ssl/certs/gitlab/cert.pem"
         nginx['ssl_certificate_key'] = "/etc/ssl/certs/gitlab/key.pem"
+        gitlab_rails["db_host"] = "gitlab_rails_db_host_goes_here"
+        gitlab_rails["db_database"] = "gitlab_rails_db_name_goes_here"
+        gitlab_rails["db_username"] = "gitlab_rails_db_username_goes_here"
+        gitlab_rails["db_password"] = "gitlab_rails_db_password_goes_here"
         # Add any other gitlab.rb configuration here, each on its own line
     hostname: gitlab.example.com
     image: gitlab/gitlab-ee:latest

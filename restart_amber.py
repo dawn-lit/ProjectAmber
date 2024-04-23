@@ -2,7 +2,7 @@ from utils import check_call, execute_sudo_docker
 
 # run docker-compose
 try:
-    check_call(["sudo", "docker-compose", "up", "-d", "gitlab_web", "postgres_db"])
+    check_call(["sudo", "docker-compose", "up", "-d", "postgres_db", "gitlab_web"])
 except Exception:
     pass
 
