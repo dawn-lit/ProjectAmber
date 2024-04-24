@@ -73,10 +73,12 @@ def public_folder(_dir: str) -> None:
     check_call(["sudo", "chmod", "777", "-R", _dir])
 
 
-def replace_content_in_file(file_path: str, from_text: str, to_text: str) -> None:
+def replace_content_in_file(
+    file_path: str, from_text: str, to_text: str, out: None | str = None
+) -> None:
     with open(file_path, "r", encoding="utf-8") as f:
         content: str = f.read()
-    with open(file_path, "w", encoding="utf-8") as f:
+    with open(file_path if out is None else out, "w", encoding="utf-8") as f:
         f.write(content.replace(from_text, to_text))
 
 
@@ -122,17 +124,48 @@ SHARE_FOLDER_DIR: Final[str] = os.path.join(
 
 # update domain in files
 replace_content_in_file(
-    os.path.join(BASE_PATH, "nginx.glob.conf"),
+    os.path.join(BASE_PATH, "services_templates", "nginx.glob.conf"),
     "example.com",
     CUSTOM_CONFIGURATION["domain"],
+    os.path.join(BASE_PATH, "services", "nginx.glob.conf"),
 )
 replace_content_in_file(
-    os.path.join(BASE_PATH, "dawnlit_web", "nginx.prod.conf"),
+    os.path.join(BASE_PATH, "services_templates", "nginx.dawnlit.prod.conf"),
     "example.com",
     CUSTOM_CONFIGURATION["domain"],
+    os.path.join(BASE_PATH, "services", "nginx.dawnlit.prod.conf"),
 )
 replace_content_in_file(
-    os.path.join(BASE_PATH, "docker-compose.yml"),
+    os.path.join(BASE_PATH, "services_templates", "docker-compose.yml"),
     "example.com",
     CUSTOM_CONFIGURATION["domain"],
+    os.path.join(BASE_PATH, "services", "docker-compose.yml"),
 )
+
+# update postgres_db config username and password
+dk_compose: dict = read_config(
+    os.path.join(BASE_PATH, "services", "docker-compose.yml")
+)
+dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_DB"] = (
+    CUSTOM_CONFIGURATION["postgres_db_name"]
+)
+dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_USER"] = (
+    CUSTOM_CONFIGURATION["postgres_db_username"]
+)
+dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_PASSWORD"] = (
+    CUSTOM_CONFIGURATION["postgres_db_password"]
+)
+dk_compose["services"]["gitlab_web"]["environment"]["GITLAB_OMNIBUS_CONFIG"] = (
+    str(dk_compose["services"]["gitlab_web"]["environment"]["GITLAB_OMNIBUS_CONFIG"])
+    .replace("gitlab_rails_db_host_goes_here", CUSTOM_CONFIGURATION["postgres_db_host"])
+    .replace("gitlab_rails_db_name_goes_here", CUSTOM_CONFIGURATION["postgres_db_name"])
+    .replace(
+        "gitlab_rails_db_username_goes_here",
+        CUSTOM_CONFIGURATION["postgres_db_username"],
+    )
+    .replace(
+        "gitlab_rails_db_password_goes_here",
+        CUSTOM_CONFIGURATION["postgres_db_password"],
+    )
+)
+write_config(os.path.join(BASE_PATH, "services", "docker-compose.yml"), dk_compose)

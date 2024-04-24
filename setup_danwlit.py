@@ -17,32 +17,6 @@ restart_systemctl("docker")
 # setup gitlab volumes location
 write_texts(".env", [f"GITLAB_HOME={SHARE_FOLDER_DIR}/gitlab", f"GITLAB_SSL=/etc/ssl"])
 
-# update postgres_db config username and password
-dk_compose: dict = read_config(os.path.join(BASE_PATH, "docker-compose.yml"))
-dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_DB"] = (
-    CUSTOM_CONFIGURATION["postgres_db_name"]
-)
-dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_USER"] = (
-    CUSTOM_CONFIGURATION["postgres_db_username"]
-)
-dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_PASSWORD"] = (
-    CUSTOM_CONFIGURATION["postgres_db_password"]
-)
-dk_compose["services"]["gitlab_web"]["environment"]["GITLAB_OMNIBUS_CONFIG"] = (
-    str(dk_compose["services"]["gitlab_web"]["environment"]["GITLAB_OMNIBUS_CONFIG"])
-    .replace("gitlab_rails_db_host_goes_here", CUSTOM_CONFIGURATION["postgres_db_host"])
-    .replace("gitlab_rails_db_name_goes_here", CUSTOM_CONFIGURATION["postgres_db_name"])
-    .replace(
-        "gitlab_rails_db_username_goes_here",
-        CUSTOM_CONFIGURATION["postgres_db_username"],
-    )
-    .replace(
-        "gitlab_rails_db_password_goes_here",
-        CUSTOM_CONFIGURATION["postgres_db_password"],
-    )
-)
-write_config(os.path.join(BASE_PATH, "docker-compose.yml"), dk_compose)
-
 # setup docker-compose
 check_call(["sudo", "docker-compose", "up", "-d", "postgres_db", "gitlab_web"])
 
@@ -89,13 +63,13 @@ write_texts(
 # use Dockerfile
 remove_if_exists(os.path.join(_FRONTEND_DIR, "Dockerfile"))
 shutil.copyfile(
-    os.path.join(BASE_PATH, "dawnlit_web", "Dockerfile"),
+    os.path.join(BASE_PATH, "services", "Dockerfile"),
     os.path.join(_FRONTEND_DIR, "Dockerfile"),
 )
-# use nginx.prod.conf
+# use nginx.dawnlit.prod.conf
 remove_if_exists(os.path.join(_FRONTEND_DIR, "nginx.conf"))
 shutil.copyfile(
-    os.path.join(BASE_PATH, "dawnlit_web", "nginx.prod.conf"),
+    os.path.join(BASE_PATH, "services", "nginx.dawnlit.prod.conf"),
     os.path.join(_FRONTEND_DIR, "nginx.conf"),
 )
 # build front-end application
@@ -128,7 +102,8 @@ execute_sudo_docker(
 
 # setup nginx
 shutil.copy2(
-    os.path.join(BASE_PATH, "nginx.glob.conf"), "/etc/nginx/conf.d/default.conf"
+    os.path.join(BASE_PATH, "services", "nginx.glob.conf"),
+    "/etc/nginx/conf.d/default.conf",
 )
 
 # restart nginx service
