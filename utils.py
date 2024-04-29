@@ -155,17 +155,4 @@ dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_USER"] = (
 dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_PASSWORD"] = (
     CUSTOM_CONFIGURATION["postgres_db_password"]
 )
-dk_compose["services"]["gitlab_web"]["environment"]["GITLAB_OMNIBUS_CONFIG"] = (
-    str(dk_compose["services"]["gitlab_web"]["environment"]["GITLAB_OMNIBUS_CONFIG"])
-    .replace("gitlab_rails_db_host_goes_here", CUSTOM_CONFIGURATION["postgres_db_host"])
-    .replace("gitlab_rails_db_name_goes_here", CUSTOM_CONFIGURATION["postgres_db_name"])
-    .replace(
-        "gitlab_rails_db_username_goes_here",
-        CUSTOM_CONFIGURATION["postgres_db_username"],
-    )
-    .replace(
-        "gitlab_rails_db_password_goes_here",
-        CUSTOM_CONFIGURATION["postgres_db_password"],
-    )
-)
 write_config(os.path.join(BASE_PATH, "services", "docker-compose.yml"), dk_compose)

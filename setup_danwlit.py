@@ -92,6 +92,8 @@ execute_sudo_docker(
     "-v",
     "$HOME/.config:/home/coder/.config",
     "-v",
+    f"$HOME/MyShare:{SHARE_FOLDER_DIR}",
+    "-v",
     "$PWD:/home/coder/project",
     "-u",
     "$(id -u):$(id -g)",

@@ -8,7 +8,7 @@ If you've known me for some time, you're aware of my avid enthusiasm for establi
 
 ### The overview:
 
-Currently, the infrastructure is tailored to support two of my critical web services: a [self-hosted GitLab](https://gitlab.dawnlit.com) and [Dawn Lit](https://dawnlit.com/). Each component is meticulously segregated and encapsulated within individual Docker containers, streamlining the deployment process.
+Currently, the infrastructure is tailored to support three of my critical web services: a [self-hosted GitLab](https://gitlab.dawnlit.com), a [code-server](https://github.com/coder/code-server) service, and [Dawn Lit](https://dawnlit.com/). Each component is meticulously segregated and encapsulated within individual Docker containers, streamlining the deployment process.
 
 ![overview](/assets/overview.png)
 

@@ -1,0 +1,31 @@
+#main-page {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+#main-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    margin-top: 5%;
+}
+
+#cover-image {
+    width: 20%;
+}
+
+h1, p {
+    font-family: "JetBrains Mono ExtraLight", serif;
+    color: white;
+}
+
+h1 {
+    font-size: xxx-large;
+}
+
+p {
+    font-size: larger;
+}
