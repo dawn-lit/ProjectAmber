@@ -2,33 +2,18 @@ import shutil
 
 from utils import *
 
-# make sure ssl dir exits
-os.makedirs("/etc/ssl", exist_ok=True)
-# write dns certificate
-write_texts("/etc/ssl/cert.pem", CUSTOM_CONFIGURATION["ssl_cert"])
-# write dns key
-write_texts("/etc/ssl/key.pem", CUSTOM_CONFIGURATION["ssl_key"])
-
-# setup ca
-os.makedirs("/etc/ssl/certs", exist_ok=True)
-check_call(["sudo", "update-ca-certificates"])
-restart_systemctl("docker")
-
-# setup gitlab volumes location
-write_texts(".env", [f"GITLAB_HOME={SHARE_FOLDER_DIR}/gitlab", f"GITLAB_SSL=/etc/ssl"])
-
 # setup docker-compose
-check_call(["sudo", "docker-compose", "up", "-d", "postgres_db", "gitlab_web"])
+check_call(["docker-compose", "up", "-d", "postgres_db", "gitlab_web"])
 
 # dawnlit backend dir path
 _BACKEND_DIR: str = os.path.join(BASE_PATH, "DawnLitWeb")
 
 # clone dawnlit backend
 if not os.path.exists(_BACKEND_DIR):
-    check_call(["sudo", "git", "clone", "https://github.com/yudonglin/DawnLitWeb.git"])
+    check_call(["git", "clone", "https://github.com/yudonglin/DawnLitWeb.git"])
 else:
-    check_call(["sudo", "git", "pull"], cwd=_BACKEND_DIR)
-check_call(["sudo", "git", "lfs", "fetch", "--all"], cwd=_BACKEND_DIR)
+    check_call(["git", "pull"], cwd=_BACKEND_DIR)
+check_call(["git", "lfs", "fetch", "--all"], cwd=_BACKEND_DIR)
 
 # modify backend database connection
 app_settings: Final[dict] = read_config(os.path.join(_BACKEND_DIR, "appsettings.json"))
@@ -41,11 +26,9 @@ app_settings["Database"][
 write_config(os.path.join(_BACKEND_DIR, "appsettings.json"), app_settings)
 
 # build back-end application
-execute_sudo_docker("build", _BACKEND_DIR, "-t", "dotnet-app")
+execute_docker("build", _BACKEND_DIR, "-t", "dotnet-app")
 # run back-end application
-execute_sudo_docker(
-    "run", "--name", "dotnet-app", "-d", "-p", "7061:8080", "dotnet-app"
-)
+execute_docker("run", "--name", "dotnet-app", "-d", "-p", "7061:8080", "dotnet-app")
 
 # dawnlit frontend dir path
 _FRONTEND_DIR = os.path.join(_BACKEND_DIR, "View")
@@ -73,14 +56,12 @@ shutil.copyfile(
     os.path.join(_FRONTEND_DIR, "nginx.conf"),
 )
 # build front-end application
-execute_sudo_docker("build", _FRONTEND_DIR, "-t", "angular-app")
+execute_docker("build", _FRONTEND_DIR, "-t", "angular-app")
 # run front-end application
-execute_sudo_docker(
-    "run", "--name", "angular-app", "-d", "-p", "4200:443", "angular-app"
-)
+execute_docker("run", "--name", "angular-app", "-d", "-p", "4200:443", "angular-app")
 
 # start code-server
-execute_sudo_docker(
+execute_docker(
     "run",
     "-it",
     "--name",

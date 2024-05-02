@@ -41,8 +41,8 @@ def execute_sudo_snap_install(_lib: str) -> None:
     execute_sudo_snap("install", _lib, "-y")
 
 
-def execute_sudo_docker(*action: str) -> None:
-    check_call(["sudo", "docker", *action])
+def execute_docker(*action: str) -> None:
+    check_call(["docker", *action])
 
 
 def add_content(path: str, content: str) -> None:

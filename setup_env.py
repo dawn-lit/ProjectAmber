@@ -66,8 +66,6 @@ check_call(["sudo", "sh", "./createSambaUser.sh"])
 
 os.remove("./createSambaUser.sh")
 
-check_call(["sudo", "reboot"])
-
 # create .config/code-server folder
 check_call(["sudo", "mkdir", "-p", "~/.config/code-server"])
 
@@ -79,3 +77,21 @@ check_call(["sudo", "mkdir", "-p", "~/.local/share/code-server"])
 
 # make .config/code-server folder public
 public_folder("~/.local/share/code-server")
+
+# make sure ssl dir exits
+os.makedirs("/etc/ssl", exist_ok=True)
+# write dns certificate
+write_texts("/etc/ssl/cert.pem", CUSTOM_CONFIGURATION["ssl_cert"])
+# write dns key
+write_texts("/etc/ssl/key.pem", CUSTOM_CONFIGURATION["ssl_key"])
+
+# setup ca
+os.makedirs("/etc/ssl/certs", exist_ok=True)
+check_call(["sudo", "update-ca-certificates"])
+restart_systemctl("docker")
+
+# setup gitlab volumes location
+write_texts(".env", [f"GITLAB_HOME={SHARE_FOLDER_DIR}/gitlab", f"GITLAB_SSL=/etc/ssl"])
+
+# reboot system
+check_call(["sudo", "reboot"])
