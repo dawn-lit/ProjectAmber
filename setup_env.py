@@ -1,9 +1,18 @@
+import shutil
+
 from utils import *
+
+"""
+# mount usb stick commends
+lsblk
+sudo mkdir /media/usbstick
+sudo mount -t vfat /dev/sdb1 /media/usbstick 
+"""
 
 # keep system running with the lid closed
 add_content("/etc/systemd/logind.conf", "HandleLidSwitch=ignore")
 add_content("/etc/systemd/logind.conf", "LidSwitchIgnoreInhibited=no")
-add_content("/etc/needrestart/needrestart.conf", "$nrconf{restart} = 'a'")
+add_content("/etc/needrestart/needrestart.conf", r"\$nrconf{restart} = \'a\'")
 
 # update to latest env
 execute_sudo_apt("update")
@@ -15,8 +24,6 @@ execute_sudo_apt("autoclean")
 _apt_packages: Final[tuple[str, ...]] = (
     "git",
     "git-lfs",
-    "docker",
-    "docker-compose",
     "cockpit",
     "samba",
     "python3-pip",
@@ -25,6 +32,38 @@ _apt_packages: Final[tuple[str, ...]] = (
 )
 for pkg in _apt_packages:
     execute_sudo_apt_install(pkg)
+
+# install docker
+check_call(["sudo", "install", "-m", "0755", "-d", "/etc/apt/keyrings"])
+check_call(
+    [
+        "sudo",
+        "curl",
+        "-fsSL",
+        "https://download.docker.com/linux/ubuntu/gpg",
+        "-o",
+        "/etc/apt/keyrings/docker.asc",
+    ]
+)
+check_call(["sudo", "chmod", "a+r", "/etc/apt/keyrings/docker.asc"])
+theCommand: str = """
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+"""
+check_call(theCommand, shell=True)
+execute_sudo_apt("update")
+_docker_packages: Final[tuple[str, ...]] = (
+    "docker-ce",
+    "docker-ce-cli",
+    "containerd.io",
+    "docker-buildx-plugin",
+    "docker-compose",
+    "docker-compose-plugin",
+)
+for pkg in _docker_packages:
+    execute_sudo_apt_install(pkg)
+
+# make docker.sock public to fix docker permission denied issue
+public_folder("/var/run/docker.sock")
 
 # refresh snap
 execute_sudo_snap("refresh")
@@ -67,16 +106,16 @@ check_call(["sudo", "sh", "./createSambaUser.sh"])
 os.remove("./createSambaUser.sh")
 
 # create .config/code-server folder
-check_call(["sudo", "mkdir", "-p", "~/.config/code-server"])
+check_call(["sudo", "mkdir", "-p", "/home/.config"])
 
 # make .config/code-server folder public
-public_folder("~/.config/code-server")
+public_folder("/home/.config")
 
 # create .local/share/code-server folder
-check_call(["sudo", "mkdir", "-p", "~/.local/share/code-server"])
+check_call(["sudo", "mkdir", "-p", "/home/.local"])
 
 # make .config/code-server folder public
-public_folder("~/.local/share/code-server")
+public_folder("/home/.local")
 
 # make sure ssl dir exits
 os.makedirs("/etc/ssl", exist_ok=True)
@@ -88,10 +127,16 @@ write_texts("/etc/ssl/key.pem", CUSTOM_CONFIGURATION["ssl_key"])
 # setup ca
 os.makedirs("/etc/ssl/certs", exist_ok=True)
 check_call(["sudo", "update-ca-certificates"])
-restart_systemctl("docker")
 
-# setup gitlab volumes location
-write_texts(".env", [f"GITLAB_HOME={SHARE_FOLDER_DIR}/gitlab", f"GITLAB_SSL=/etc/ssl"])
+# setup nginx
+shutil.copy2(
+    os.path.join(BASE_PATH, "services", "nginx.glob.conf"),
+    "/etc/nginx/conf.d/default.conf",
+)
+
+# restart nginx service
+restart_service("nginx")
+
 
 # reboot system
 check_call(["sudo", "reboot"])

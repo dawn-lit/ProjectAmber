@@ -139,13 +139,11 @@ replace_content_in_file(
     os.path.join(BASE_PATH, "services_templates", "docker-compose.yml"),
     "example.com",
     CUSTOM_CONFIGURATION["domain"],
-    os.path.join(BASE_PATH, "services", "docker-compose.yml"),
+    os.path.join(BASE_PATH, "docker-compose.yml"),
 )
 
 # update postgres_db config username and password
-dk_compose: dict = read_config(
-    os.path.join(BASE_PATH, "services", "docker-compose.yml")
-)
+dk_compose: dict = read_config(os.path.join(BASE_PATH, "docker-compose.yml"))
 dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_DB"] = (
     CUSTOM_CONFIGURATION["postgres_db_name"]
 )
@@ -155,4 +153,4 @@ dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_USER"] = (
 dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_PASSWORD"] = (
     CUSTOM_CONFIGURATION["postgres_db_password"]
 )
-write_config(os.path.join(BASE_PATH, "services", "docker-compose.yml"), dk_compose)
+write_config(os.path.join(BASE_PATH, "docker-compose.yml"), dk_compose)
