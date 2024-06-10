@@ -1,25 +1,11 @@
-from utils import check_call, execute_docker
+from utils import execute_docker, get_all_docker_containers
 
-# run docker-compose
-try:
-    check_call(["docker", "compose", "up", "-d", "postgres_db", "gitlab_web"])
-except Exception:
-    pass
+# sudo chmod -R 777 /var/run/docker.sock
 
-# restart back-end application
-try:
-    execute_docker("restart", "dotnet-app")
-except Exception:
-    pass
-
-# restart front-end application
-try:
-    execute_docker("restart", "angular-app")
-except Exception:
-    pass
-
-# restart coder
-try:
-    execute_docker("restart", "/code-server")
-except Exception:
-    pass
+# restart all docker containers
+for container_id in get_all_docker_containers():
+    try:
+        print(f"Restarting docker container {container_id}...")
+        execute_docker("restart", container_id)
+    except Exception:
+        print(f"Fail to restart docker container {container_id}, skip...")

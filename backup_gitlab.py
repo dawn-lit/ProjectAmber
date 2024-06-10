@@ -1,4 +1,4 @@
-from utils import *
+from config import SHARE_FOLDER_DIR, execute_docker, os
 
 # remove all previous backup
 try:

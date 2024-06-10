@@ -1,6 +1,6 @@
 import shutil
 
-from utils import *
+from config import *
 
 """
 # mount usb stick commends
