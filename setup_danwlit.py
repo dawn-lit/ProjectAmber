@@ -1,6 +1,6 @@
 import shutil
 
-from utils import *
+from config import *
 
 # setup gitlab volumes location
 write_texts(".env", [f"GITLAB_HOME={SHARE_FOLDER_DIR}/gitlab", f"GITLAB_SSL=/etc/ssl"])

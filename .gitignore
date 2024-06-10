@@ -1,2 +1,4 @@
 .idea/
 __pycache__/
+services/nginx.dawnlit.prod.conf
+services/nginx.glob.conf

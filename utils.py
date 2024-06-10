@@ -1,12 +1,8 @@
 import json
 import os
-from subprocess import check_call
-from typing import Final
+from subprocess import check_call, check_output
 
 import yaml
-
-# base path
-BASE_PATH: Final[str] = os.path.dirname(__file__)
 
 
 def execute_sudo_apt(*action: str) -> None:
@@ -45,6 +41,10 @@ def execute_docker(*action: str) -> None:
     check_call(["docker", *action])
 
 
+def get_all_docker_containers() -> tuple[str, ...]:
+    return tuple(check_output(["docker", "ps", "-a", "-q"]).decode().split("\n")[:-1])
+
+
 def add_content(path: str, content: str) -> None:
     check_call(["sudo", "bash", "-c", " ".join(["echo", "-e", content, ">>", path])])
 
@@ -80,77 +80,3 @@ def replace_content_in_file(
         content: str = f.read()
     with open(file_path if out is None else out, "w", encoding="utf-8") as f:
         f.write(content.replace(from_text, to_text))
-
-
-# user customized configuration
-CUSTOM_CONFIGURATION_PATH: Final[str] = os.path.join(BASE_PATH, "configuration.json")
-CUSTOM_CONFIGURATION: Final[dict] = read_config(CUSTOM_CONFIGURATION_PATH)
-
-_ENABLE_CUSTOM_CONFIGURATION_VALIDATION: bool = True
-
-if _ENABLE_CUSTOM_CONFIGURATION_VALIDATION:
-    if len(CUSTOM_CONFIGURATION["password"]) == 0:
-        raise ValueError(
-            "configuration.json: password has not being configured correctly!"
-        )
-
-    if len(CUSTOM_CONFIGURATION["username"]) == 0:
-        raise ValueError(
-            "configuration.json: username has not being configured correctly!"
-        )
-
-    # make sure ssl key is valid
-    if len(CUSTOM_CONFIGURATION["ssl_key"]) == 0:
-        raise ValueError(
-            "configuration.json: ssl_key has not being configured correctly!"
-        )
-
-    # make sure ssl cert is valid
-    if len(CUSTOM_CONFIGURATION["ssl_cert"]) == 0:
-        raise ValueError(
-            "configuration.json: ssl_cert has not being configured correctly!"
-        )
-
-    # make domain is valid
-    if len(CUSTOM_CONFIGURATION["domain"]) == "example.com":
-        raise ValueError(
-            "configuration.json: domain has not being configured correctly!"
-        )
-
-# path to locally shared folder
-SHARE_FOLDER_DIR: Final[str] = os.path.join(
-    "/home", CUSTOM_CONFIGURATION["username"], CUSTOM_CONFIGURATION["SharedFolderName"]
-)
-
-# update domain in files
-replace_content_in_file(
-    os.path.join(BASE_PATH, "services_templates", "nginx.glob.conf"),
-    "example.com",
-    CUSTOM_CONFIGURATION["domain"],
-    os.path.join(BASE_PATH, "services", "nginx.glob.conf"),
-)
-replace_content_in_file(
-    os.path.join(BASE_PATH, "services_templates", "nginx.dawnlit.prod.conf"),
-    "example.com",
-    CUSTOM_CONFIGURATION["domain"],
-    os.path.join(BASE_PATH, "services", "nginx.dawnlit.prod.conf"),
-)
-replace_content_in_file(
-    os.path.join(BASE_PATH, "services_templates", "docker-compose.yml"),
-    "example.com",
-    CUSTOM_CONFIGURATION["domain"],
-    os.path.join(BASE_PATH, "docker-compose.yml"),
-)
-
-# update postgres_db config username and password
-dk_compose: dict = read_config(os.path.join(BASE_PATH, "docker-compose.yml"))
-dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_DB"] = (
-    CUSTOM_CONFIGURATION["postgres_db_name"]
-)
-dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_USER"] = (
-    CUSTOM_CONFIGURATION["postgres_db_username"]
-)
-dk_compose["services"]["postgres_db"]["environment"]["POSTGRES_PASSWORD"] = (
-    CUSTOM_CONFIGURATION["postgres_db_password"]
-)
-write_config(os.path.join(BASE_PATH, "docker-compose.yml"), dk_compose)

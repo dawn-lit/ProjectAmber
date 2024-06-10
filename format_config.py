@@ -1,6 +1,6 @@
 from glob import glob
 
-from utils import BASE_PATH, CUSTOM_CONFIGURATION_PATH, os, read_config, write_config
+from config import BASE_PATH, CUSTOM_CONFIGURATION_PATH, os, read_config, write_config
 
 # format all yml file
 for path in glob(os.path.join(BASE_PATH, "*.yml")):
