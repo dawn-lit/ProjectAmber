@@ -41,6 +41,20 @@ def execute_docker(*action: str) -> None:
     check_call(["docker", *action])
 
 
+def stop_docker_container(name: str) -> None:
+    try:
+        execute_docker("container", "stop", name)
+    except Exception:
+        print(f"Warning: Unable to stop container '{name}'")
+
+
+def remove_docker_container(name: str) -> None:
+    try:
+        execute_docker("container", "remove", name)
+    except Exception:
+        print(f"Warning: Unable to remove container '{name}'")
+
+
 def get_all_docker_containers() -> tuple[str, ...]:
     return tuple(check_output(["docker", "ps", "-a", "-q"]).decode().split("\n")[:-1])
 
