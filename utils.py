@@ -50,9 +50,17 @@ def stop_docker_container(name: str) -> None:
 
 def remove_docker_container(name: str) -> None:
     try:
+        stop_docker_container(name)
         execute_docker("container", "remove", name)
     except Exception:
         print(f"Warning: Unable to remove container '{name}'")
+
+
+def pull_docker_base_image(name: str) -> None:
+    try:
+        execute_docker("image", "pull", name)
+    except Exception:
+        print(f"Warning: Unable to pull base image '{name}'")
 
 
 def get_all_docker_containers() -> tuple[str, ...]:

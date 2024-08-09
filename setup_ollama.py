@@ -1,8 +1,10 @@
 from utils import *
 
 # remove old ollama container
-stop_docker_container("ollama")
 remove_docker_container("ollama")
+
+# pull latest image
+pull_docker_base_image("ollama/ollama:latest")
 
 # run ollama container - cpu mode
 # https://hub.docker.com/r/ollama/ollama
@@ -15,7 +17,7 @@ execute_docker(
     "11434:11434",
     "--name",
     "ollama",
-    "ollama/ollama",
+    "ollama/ollama:latest",
 )
 
 # using llama3.1 model
@@ -24,6 +26,6 @@ execute_docker(
     "-it",
     "ollama",
     "ollama",
-    "run",
+    "pull",
     "llama3.1",
 )
